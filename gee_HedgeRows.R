@@ -9,6 +9,7 @@ setwd("~/R/RGEE_HedgeRows/")
 # Librerias 
 library(rgee)
 library(sf)
+library(raster)
 source("Funciones/RGEE.R")
 
 # Inicializar conexión con GEE
@@ -34,9 +35,11 @@ reducer <- ee$Reducer$percentile(c(25,50,75))
 
 # Cargar Sentinel-1 C-band SAR Ground Range collection (log scaling, VV co-polar)
 vv <-  ee$ImageCollection('COPERNICUS/S1_GRD')$filterBounds(Catacamas)$
-filter(ee$Filter$listContains('transmitterReceiverPolarisation', 'VV'))$
-filter(ee$Filter$eq('instrumentMode', 'IW'))$
-select('VV')
+  filter(ee$Filter$listContains('transmitterReceiverPolarisation', 'VV'))$
+  filter(ee$Filter$eq('instrumentMode', 'IW'))$
+  filter(ee$Filter$eq('orbitProperties_pass', 'DESCENDING'))$
+  select('VV')
+
 
 # Reducción considerando la colección de imágenes VV para el rango de tiempo definido
 S1VV.percs <- reduce.imagesS1(vv, "2020-01-01", "2020-12-31", extCatacamas, prefix='S1_', reducer=reducer)
@@ -45,40 +48,16 @@ S1VV.percs <- reduce.imagesS1(vv, "2020-01-01", "2020-12-31", extCatacamas, pref
 S1VV.percs.bands <- S1VV.percs$bandNames()$getInfo()
 S1VV.percs.bands
 
-#paleta de colores
-RADARParams <- list(palette = c(
-  "#1a9850", "#66bd63", "#a6d96a", 
-  "#d9ef8b", "#fee08b", "#fdae61",  
-  "#f46d43", "#d73027" 
-),
-min = -20)
-
-
-Map$centerObject(extCatacamas,zoom=12)
-Map$addLayer(
-  eeObject = extCatacamas,
-  name = "Área de Trabajo"
-)  +
-Map$addLayer(
-  eeObject = S1VV.percs$select("S1_VV_p25"),
-  RADARParams,
-  name = "RADAR VV Percentil 25"
-) +
-Map$addLayer(
-  eeObject = S1VV.percs$select("S1_VV_p50"),
-  RADARParams,
-  name = "RADAR VV Percentil 50"
-) +  
-Map$addLayer(
-  eeObject = S1VV.percs$select("S1_VV_p75"),
-  RADARParams,
-  name = "RADAR VV Percentil 75"
-)   
+#Filtrados
+S1VVp25filt <- S1VV.percs$select("S1_VV_p25")$focal_median()$rename("S1_VV_p25filt")
+S1VVp50filt <- S1VV.percs$select("S1_VV_p50")$focal_median()$rename("S1_VV_p50filt")
+S1VVp75filt <- S1VV.percs$select("S1_VV_p75")$focal_median()$rename("S1_VV_p75filt")
 
 # Cargar Sentinel-1 C-band SAR Ground Range collection (log scaling, VV co-polar)
 vh <-  ee$ImageCollection('COPERNICUS/S1_GRD')$filterBounds(Catacamas)$
   filter(ee$Filter$listContains('transmitterReceiverPolarisation', 'VH'))$
   filter(ee$Filter$eq('instrumentMode', 'IW'))$
+  filter(ee$Filter$eq('orbitProperties_pass', 'DESCENDING')) $
   select('VH')
 
 # Reducción considerando la colección de imágenes VH para el rango de tiempo definido
@@ -88,72 +67,40 @@ S1VH.percs <- reduce.imagesS1(vh, "2020-01-01", "2020-12-31", extCatacamas, pref
 S1VH.percs.bands <- S1VH.percs$bandNames()$getInfo()
 S1VH.percs.bands
 
-#Visualizar VH
-Map$centerObject(extCatacamas,zoom=12)
-Map$addLayer(
-  eeObject = extCatacamas,
-  name = "Área de Trabajo"
-)  +
-  Map$addLayer(
-    eeObject = S1VH.percs$select("S1_VH_p25"),
-    RADARParams,
-    name = "RADAR VH Percentil 25"
-  ) +
-  Map$addLayer(
-    eeObject = S1VH.percs$select("S1_VH_p50"),
-    RADARParams,
-    name = "RADAR VH Percentil 50"
-  ) +  
-  Map$addLayer(
-    eeObject = S1VH.percs$select("S1_VH_p75"),
-    RADARParams,
-    name = "RADAR VH Percentil 75"
-  )   
+#Filtrados
+S1VHp25filt <- S1VH.percs$select("S1_VH_p25")$focal_median()$rename("S1_VH_p25filt")
+S1VHp50filt <- S1VH.percs$select("S1_VH_p50")$focal_median()$rename("S1_VH_p50filt")
+S1VHp75filt <- S1VH.percs$select("S1_VH_p75")$focal_median()$rename("S1_VH_p75filt")
 
 # Cargar Sentinel-1 C-band SAR Ground Range collection (log scaling, VV co-polar)
 RadarVV <-  ee$ImageCollection('COPERNICUS/S1_GRD')$filterBounds(Catacamas)$
-  filter(ee$Filter$listContains('transmitterReceiverPolarisation', 'VH'))$
+  filter(ee$Filter$listContains('transmitterReceiverPolarisation', 'VV'))$
   filter(ee$Filter$eq('instrumentMode', 'IW'))$
+  filter(ee$Filter$eq('orbitProperties_pass', 'DESCENDING'))$
   filterDate('2019-01-01','2019-02-01')$
-  select('VV')$median()$rename("VV")
+  select('VV')$median()$rename("VV")$clip(extCatacamas)
+
+#Filtrado
+RadarVVfilt <- RadarVV$focal_median()$rename("VVfilt")
 
 RadarVH <-  ee$ImageCollection('COPERNICUS/S1_GRD')$filterBounds(Catacamas)$
   filter(ee$Filter$listContains('transmitterReceiverPolarisation', 'VH'))$
   filter(ee$Filter$eq('instrumentMode', 'IW'))$
+  filter(ee$Filter$eq('orbitProperties_pass', 'DESCENDING'))$
   filterDate('2019-01-01','2019-02-01')$
-  select('VH')$median()$rename("VH")
+  select('VH')$median()$rename("VH")$clip(extCatacamas)
 
-
-Map$centerObject(extCatacamas,zoom=12)
-Map$addLayer(
-  eeObject = extCatacamas,
-  name = "Área de Trabajo"
-)  +
-  Map$addLayer(
-    eeObject = RadarVH,
-    RADARParams,
-    name = "RADAR VH"
-  ) +
-  Map$addLayer(
-    eeObject = RadarVV,
-    RADARParams,
-    name = "RADAR VV"
-  ) 
+#Filtrado
+RadarVHfilt <- RadarVH$focal_median()$rename("VHfilt")
 
 # Sentinel 2
-#Compuesto Sentinel 2
- Compuesto_sen2 <- ee$ImageCollection('COPERNICUS/S2_SR')$
-  filterDate('2019-01-01','2021-03-01')$
-  filterBounds(Catacamas)$
-  filterMetadata('CLOUDY_PIXEL_PERCENTAGE','less_than',10)$median()$
-  clip(Catacamas)$divide(10000)$select(c("B2","B3","B4","B5","B6","B7","B8","B9","B11","B12"))
 
 #Una imagen
- Coleccion_sen2 <- ee$ImageCollection('COPERNICUS/S2_SR')$
-   filterDate('2019-01-01','2021-03-01')$
-   filterBounds(Catacamas)$
-   filterMetadata('CLOUDY_PIXEL_PERCENTAGE','less_than',10)
- 
+Coleccion_sen2 <- ee$ImageCollection('COPERNICUS/S2_SR')$
+  filterDate('2019-01-01','2021-03-01')$
+  filterBounds(Catacamas)$
+  filterMetadata('CLOUDY_PIXEL_PERCENTAGE','less_than',10)
+
 #ee_get_date_ic(Coleccion_sen2)
 #                                                        id          time_start
 # 1 COPERNICUS/S2_SR/20190129T160521_20190129T161214_T16PFB 2019-01-29 16:19:17
@@ -165,88 +112,272 @@ Map$addLayer(
 id <- "COPERNICUS/S2_SR/20190129T160521_20190129T161214_T16PFB"
 sen2 <- ee$Image(id)$clip(Catacamas)$divide(10000)$select(c("B2","B3","B4","B5","B6","B7","B8","B9","B11","B12"))
 
-#Parámetros de visualización
-S2.viz <- gen.vizParams(sen2, list('B8','B4','B3'), extCatacamas)
-
-Map$centerObject(Catacamas,zoom=11)
-Map$addLayer(
-  eeObject = extCatacamas,
-  name = "Área de Trabajo"
-)  +
-  Map$addLayer(
-    eeObject = Compuesto_sen2,
-    visParams = list(
-      bands = c("B8", "B4", "B3"),
-      max = 0.4
-    ),
-    name = "Sentinel Vegetación Infraroja Compuesto Temporal"
-  ) +
-  Map$addLayer(
-    eeObject = sen2,
-    visParams = list(
-      bands = c("B8", "B4", "B3"),
-      max = 0.4
-    ),
-    name = "Sentinel Vegetación Infraroja Imagen enero 2019"
-  )  
-
-
+#Una imagen
 # Índices Espectrales
-S2ndvi <- Compuesto_sen2$normalizedDifference(c('B8','B4'))$rename("S2ndvi")
-S2ndbi <- Compuesto_sen2$normalizedDifference(c('B11','B8'))$rename("S2ndbi") #built-up index
-S2ndbi2 <- Compuesto_sen2$normalizedDifference(c('B12','B8'))$rename("S2ndbi2") #built-up index
-S2evi <- EVI(Compuesto_sen2)$rename("S2evi")
-S2gli <- GLI(Compuesto_sen2)$rename("S2gli")
-S2savi <- SAVI(Compuesto_sen2)$rename("S2savi")
-S2bsi <- BSI(Compuesto_sen2)$rename("S2bsi")
-S2ndmi <- NDMI(Compuesto_sen2)$rename("S2ndmi")
+S2ndviene <- sen2$normalizedDifference(c('B8','B4'))$rename("S2ndviene")
+S2ndbiene <- sen2$normalizedDifference(c('B11','B8'))$rename("S2ndbiene") #built-up index
+S2ndbi2ene <- sen2$normalizedDifference(c('B12','B8'))$rename("S2ndbi2ene") #built-up index
+S2eviene <- EVI(sen2)$rename("S2eviene")
+S2gliene <- GLI(sen2)$rename("S2gliene")
+S2saviene <- SAVI(sen2)$rename("S2saviene")
+S2bsiene <- BSI(sen2)$rename("S2bsiene")
+S2ndmiene <- NDMI(sen2)$rename("S2ndmiene")
+S2ndyiene <- NDYI(sen2)$rename("S2ndyiene")
+
+#Propuestos Julie una imagen
+S2repene <- S2REP(sen2)$rename("S2repene")$clip(extCatacamas)
+S2mcariene <- MCARI(sen2)$rename("S2mcariene")$clip(extCatacamas)
+S2wdviene <- WDVI(sen2)$rename("S2wdviene")$clip(extCatacamas)
 
 #Métricas de vecindad
 #cambio gradual
-ndviGradient <- S2ndvi$gradient()$pow(2)$reduce("sum")$sqrt()$rename("NDVI_GRAD")
-Map$addLayer(
-  eeObject = ndviGradient,
-  visParams = list(min = 0, max = 0.01, palette = c("darkgreen", "darkred")),
-  name = "Gradiente NDVI"
-)
+ndviGradientene <- S2ndviene$gradient()$pow(2)$reduce("sum")$sqrt()$rename("NDVI_GRADene")
 
-#Diversidad Espectrla
+#Diversidad Espectral
 #Shannon
 Shannon <-  ee$Image('users/klauswiesengine/ShannonCatacamas')$rename('Shannon')
-
-Map$addLayer(
-  eeObject = Shannon,
-  visParams = list(min = 0, max = 2.2, palette = c("darkred", "yellow", "orange", "darkgreen")),
-  name = "Shannan Spatial Divesity"
-)
 
 #RAO
 RAO <- ee$Image('users/klauswiesengine/CatacamasRAO')$rename("RAO")
 
-Map$addLayer(
-  eeObject = RAO,
-  visParams = list(min = 0, max = 0.21, palette = c("darkred", "yellow", "orange", "darkgreen")),
-  name = "Shannan Spatial Divesity"
-)
-
 # Unir todas
-Brick <- Compuesto_sen2$addBands(S1VH.percs)$
-              addBands(S1VV.percs)$
-              addBands(RadarVH)$
-              addBands(RadarVV)$
-              addBands(S2ndvi)$
-              addBands(S2evi)$
-              addBands(S2bsi)$
-              addBands(S2gli)$
-              addBands(S2ndmi)$
-              addBands(S2ndbi)$
-              addBands(S2ndbi2)$
-              addBands(RAO)$
-              addBands(Shannon)$
-              addBands(ndviGradient)
+Brick <- sen2$
+  addBands(S2ndviene)$float()$
+  addBands(S2eviene)$float()$
+  addBands(S2bsiene)$float()$
+  addBands(S2gliene)$float()$
+  addBands(S2ndmiene)$float()$
+  addBands(S2ndbiene)$float()$
+  addBands(S2ndbi2ene)$float()$
+  addBands(ndviGradientene)$float()$
+  addBands(S2repene)$float()$
+  addBands(S2mcariene)$float()$
+  addBands(S2wdviene)$float()$
+  addBands(S2ndyiene)$float()$
+  addBands(RAO)$float()$
+  addBands(Shannon)$float()$
+  addBands(S1VHp25filt)$
+  addBands(S1VHp50filt)$
+  addBands(S1VHp75filt)$
+  addBands(S1VVp25filt)$
+  addBands(S1VVp50filt)$
+  addBands(S1VVp75filt)$
+  addBands(RadarVHfilt)$
+  addBands(RadarVVfilt)
 
 # Extraer nombres de cada variable
 Brick.bands <- Brick$bandNames()$getInfo()
 print(Brick.bands)
+
+#Muestras
+# Cargar colección de datos para clasificación ----
+#Muestras
+Muestras <- "SHP/Entrenamiento.shp" %>%
+  st_read(quiet = TRUE) %>% 
+  sf_as_ee()
+
+#Número de Muestras
+Muestras$size()$getInfo()
+
+# Clases cobertura vegetal y usos del suelo (CVUS):
+## 0-'Cerco Vivo', 1-'Bosque', 2-Matorral, 3-Pasto
+Colores <- list('0'='darkgreen', 
+                '1'='green', 
+                '2' = "white", 
+                '3' = 'gray')
+
+#Visualizar muestras
+Map$centerObject(extCatacamas,zoom=12)
+layers <- list(Map$addLayer(extCatacamas, {}, "Área de Interés"))
+plot.samples(Muestras, 'Clave', Colores, layers)
+
+# Sobreposición de muestras ----
+ini <- Sys.time()
+# Función para extraer los valores de stack de imágenes por cada muestra
+# exporta a un archivo CSV a Google Drive, lo descarga y carga a R
+samples.Catacamas <- overlayer.samples(Muestras, Brick)
+fin <- Sys.time() - ini
+print(fin)
+
+#a <- read.csv("/tmp/Rtmp6vGChl/overlay_20201215_165909_8768.csv")
+
+# Filtar Columnas de interés
+samples.Catacamas <- samples.Catacamas[,c(Brick.bands, 'Clave')]
+
+#dir.create("CSV")
+write.csv(samples.Catacamas, "CSV/samplesCatacamas.csv", row.names = FALSE)
+
+# variable predictora a FACTOR 
+# para que concuerde con mlr3
+samples.Catacamas$Clave <- as.factor(samples.Catacamas$Clave)
+
+# Tunning modelo Random Forest----
+
+# Cargar mlr3 packages
+# documentación https://mlr3book.mlr-org.com/introduction.html
+library("mlr3")
+library("mlr3learners")
+library("mlr3pipelines")
+library("mlr3filters")
+library("mlr3misc")
+library("paradox")
+library("mlr3tuning")
+
+# Semilla para obtener resultados reproducibles
+set.seed(1, "L'Ecuyer")
+
+#Eliminar NA en varibles de entrada
+samples.Catacamas <- na.omit(samples.Catacamas)
+
+# Crear una nueva tarea de clasificación
+task <- TaskClassif$new("Brick", samples.Catacamas, target = "Clave")
+
+# Clasificación usando random forest aunque mlr3 soporta varios algoritmos
+lrn <- lrn("classif.ranger", importance = "impurity")
+
+# Aquí especificamos los hipeparametros soportados por GEE (ee.Classifier.smileRandomForest)
+mtry.upper <- as.integer((ncol(samples.Catacamas)-1) / 2)
+prms <- ParamSet$new(list(
+  ParamInt$new("min.node.size", lower = 1, upper = 4), ## minLeafPopulation in GEE
+  ParamInt$new("num.trees", lower = 50, upper = 500), ## numberOfTrees in GEE
+  ParamInt$new("mtry", lower = 1, upper = mtry.upper) ## variablesPerSplit in GEE
+))
+
+# Definir los valores de los hiperpametros
+design = expand.grid(
+  min.node.size = seq(1,4,1),
+  mtry = seq(1, mtry.upper, 3),
+  num.trees = seq(50, 501, 25)
+)
+
+# Crear instancia de tuning
+tnr.config <- TuningInstanceSingleCrit$new(
+  task = task,
+  learner = lrn,
+  resampling = rsmp("cv", folds = 5)$instantiate(task), # 5-Fold crossvalidation
+  measure = msr(c("classif.acc")), # Maximize the overall accuracy
+  search_space = prms,
+  terminator = trm("none") # all design should be evaluated
+)
+
+# Cargar tuner
+tuner <- tnr("design_points", design = as.data.table(design))
+
+# Comenzar la optimización
+inis <- Sys.time()
+tuner$optimize(tnr.config)
+fin <- Sys.time() - inis
+print(fin)
+
+# ¿Cuáles son las variables más importantes?
+filter <- flt("importance", learner = lrn)
+filter$calculate(task)
+
+# Resultados de la optimización
+best.bands <- as.data.table(filter)
+print(best.bands)
+#feature     score
+#1:            B3 248.10470
+#2:            B2 190.46291
+#3:            B4 164.98043
+#4:            B5 162.77809
+#5:           RAO 125.54170
+#6:           B12 123.67182
+#7:            B9 103.81703
+#8:     S2ndviene 102.64197
+#9:      S2repene 101.69672
+#10:           B11  98.51832
+#11: S1_VH_p25filt  94.24446
+#12:    S2mcariene  86.69232
+#13:  NDVI_GRADene  84.59865
+#14: S1_VV_p25filt  82.98697
+#15:     S2ndyiene  78.96084
+#16:            B7  78.49868
+#17:      S2gliene  77.29656
+#18:            B6  77.10623
+#19:    S2ndbi2ene  75.97298
+#20: S1_VV_p50filt  69.17760
+#21:            B8  66.69769
+#22: S1_VV_p75filt  66.53203
+#23:        VHfilt  65.71276
+#24:        VVfilt  64.75392
+#25: S1_VH_p50filt  63.90415
+#26: S1_VH_p75filt  62.21532
+#27:      S2bsiene  61.34297
+#28:     S2ndmiene  61.28765
+#29:     S2ndbiene  60.46560
+#30:      S2eviene  59.25844
+#31:     S2wdviene  57.51041
+#32:       Shannon  41.60634
+
+
+write.csv(best.bands, "CSV/BestBands.csv")
+best.hparams <- tnr.config$result_learner_param_vals
+print(best.hparams)
+
+#$importance
+#[1] "impurity"
+
+#$min.node.size
+#[1] 3
+
+#$num.trees
+#[1] 125
+
+#$mtry
+#[1] 10
+
+#min.node.size, num.trees, mtry
+
+# Clasificación con GEE
+# Sobreponer los puntos en el stack de imágenes para obtener los datos de entrenamiento (Objeto GEE).
+training <- Brick$sampleRegions(
+  collection = Muestras,
+  properties = list("Clave"),
+  scale = 10,
+  tileScale=2  
+)
+
+# RF con hiperparametros optimizados por MLR3
+rf1 <- ee$Classifier$smileRandomForest(
+  numberOfTrees=best.hparams$num.trees, 
+  variablesPerSplit=best.hparams$mtry, 
+  minLeafPopulation=best.hparams$min.node.size
+)
+
+# Entrenamiento de modelos
+modelorf <- rf1$train(training, 'Clave', Brick.bands)
+
+# Predicción de modelos
+clasificacionRF <- Brick$classify(modelorf)
+
+#Parametros de visualización
+#S2.viz <- gen.vizParams(Brick, list('B8','B4','B3'), extCatacamas)
+
+# Visualizar clasificación y Datos
+Map$centerObject(extCatacamas,zoom=11)
+Map$addLayer(
+  eeObject = Brick,
+  visParams = list(
+    bands = c("B8", "B4", "B3"),
+    max = 0.4
+  ),
+  name = "Sentinel Falso Color Infrarojo"
+) +
+  Map$addLayer(
+    eeObject = clasificacionRF,
+    visParams = list(
+      palette = toString(Colores),
+      min = 0,
+      max = 3
+    ),
+    name = "Clasificación RF"
+  )
+
+
+Clasi <- ee_as_raster(clasificacionRF$clip(extCatacamas), scale=10)
+plot(Clasi)
+writeRaster(Clasi, paste("ClasificacionRF_", Sys.Date(), sep=""))
+
 
 
