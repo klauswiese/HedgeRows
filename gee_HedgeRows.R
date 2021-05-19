@@ -3,7 +3,7 @@
 #K. Wiese
 #3 de Marzo 2021
 
-# Definir directorio de trabajo ----
+# Definir directorio de trabajo
 setwd("~/R/RGEE_HedgeRows/")
 
 # Librerias 
@@ -12,10 +12,10 @@ library(sf)
 library(raster)
 source("Funciones/RGEE.R")
 
-# Inicializar conexión con GEE
+# Iniciar conexión con GEE
 ee_Initialize(email = 'klauswiesengine@gmail.com', drive = TRUE)
 
-# Cargar colección de datos para clasificación ----
+# Cargar colección de datos para clasificación
 #Límites área de estudio
 Catacamas <- "SHP/CatacamasAOI.shp" %>%
   st_read(quiet = TRUE) %>% 
