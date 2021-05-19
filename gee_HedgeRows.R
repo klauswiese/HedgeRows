@@ -48,7 +48,7 @@ S1VV.percs <- reduce.imagesS1(vv, "2020-01-01", "2020-12-31", extCatacamas, pref
 S1VV.percs.bands <- S1VV.percs$bandNames()$getInfo()
 S1VV.percs.bands
 
-#Filtrados
+# Filtrados
 S1VVp25filt <- S1VV.percs$select("S1_VV_p25")$focal_median()$rename("S1_VV_p25filt")
 S1VVp50filt <- S1VV.percs$select("S1_VV_p50")$focal_median()$rename("S1_VV_p50filt")
 S1VVp75filt <- S1VV.percs$select("S1_VV_p75")$focal_median()$rename("S1_VV_p75filt")
@@ -101,6 +101,7 @@ Coleccion_sen2 <- ee$ImageCollection('COPERNICUS/S2_SR')$
   filterBounds(Catacamas)$
   filterMetadata('CLOUDY_PIXEL_PERCENTAGE','less_than',10)
 
+#imágenes que cumplen con la condición de menos de 10% de nubes en la escena completa
 #ee_get_date_ic(Coleccion_sen2)
 #                                                        id          time_start
 # 1 COPERNICUS/S2_SR/20190129T160521_20190129T161214_T16PFB 2019-01-29 16:19:17
@@ -109,6 +110,7 @@ Coleccion_sen2 <- ee$ImageCollection('COPERNICUS/S2_SR')$
 # 4 COPERNICUS/S2_SR/20201109T160511_20201109T161049_T16PFB 2020-11-09 16:19:25
 
 #Seleccionar imagen
+#imagen de enero 2021
 id <- "COPERNICUS/S2_SR/20190129T160521_20190129T161214_T16PFB"
 sen2 <- ee$Image(id)$clip(Catacamas)$divide(10000)$select(c("B2","B3","B4","B5","B6","B7","B8","B9","B11","B12"))
 
