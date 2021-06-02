@@ -282,7 +282,7 @@ print(best.bands)
 #guardar importancia de bandas
 write.csv(best.bands, "CSV/BestBands.csv")
 
-
+#Mejores parámetros de modelo
 best.hparams <- tnr.config$result_learner_param_vals
 print(best.hparams)
 
