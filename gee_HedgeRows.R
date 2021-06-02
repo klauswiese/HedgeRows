@@ -353,9 +353,6 @@ modelorf <- rf1$train(training, 'Clave', Brick.bands)
 # Predicción de modelos
 clasificacionRF <- Brick$classify(modelorf)
 
-#Parametros de visualización
-#S2.viz <- gen.vizParams(Brick, list('B8','B4','B3'), extCatacamas)
-
 # Visualizar clasificación y Datos
 Map$centerObject(extCatacamas,zoom=11)
 Map$addLayer(
