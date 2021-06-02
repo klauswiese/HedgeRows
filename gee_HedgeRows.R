@@ -201,8 +201,6 @@ samples.Catacamas <- overlayer.samples(Muestras, Brick)
 fin <- Sys.time() - ini
 print(fin)
 
-#a <- read.csv("/tmp/Rtmp6vGChl/overlay_20201215_165909_8768.csv")
-
 # Filtar Columnas de interés
 samples.Catacamas <- samples.Catacamas[,c(Brick.bands, 'Clave')]
 
