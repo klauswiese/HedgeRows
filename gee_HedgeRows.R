@@ -278,42 +278,11 @@ filter$calculate(task)
 # Resultados de la optimización
 best.bands <- as.data.table(filter)
 print(best.bands)
-#feature     score
-#1:            B3 248.10470
-#2:            B2 190.46291
-#3:            B4 164.98043
-#4:            B5 162.77809
-#5:           RAO 125.54170
-#6:           B12 123.67182
-#7:            B9 103.81703
-#8:     S2ndviene 102.64197
-#9:      S2repene 101.69672
-#10:           B11  98.51832
-#11: S1_VH_p25filt  94.24446
-#12:    S2mcariene  86.69232
-#13:  NDVI_GRADene  84.59865
-#14: S1_VV_p25filt  82.98697
-#15:     S2ndyiene  78.96084
-#16:            B7  78.49868
-#17:      S2gliene  77.29656
-#18:            B6  77.10623
-#19:    S2ndbi2ene  75.97298
-#20: S1_VV_p50filt  69.17760
-#21:            B8  66.69769
-#22: S1_VV_p75filt  66.53203
-#23:        VHfilt  65.71276
-#24:        VVfilt  64.75392
-#25: S1_VH_p50filt  63.90415
-#26: S1_VH_p75filt  62.21532
-#27:      S2bsiene  61.34297
-#28:     S2ndmiene  61.28765
-#29:     S2ndbiene  60.46560
-#30:      S2eviene  59.25844
-#31:     S2wdviene  57.51041
-#32:       Shannon  41.60634
 
-
+#guardar importancia de bandas
 write.csv(best.bands, "CSV/BestBands.csv")
+
+
 best.hparams <- tnr.config$result_learner_param_vals
 print(best.hparams)
 
