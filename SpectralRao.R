@@ -2,7 +2,7 @@
 #requiere raster, svMisc, proxy, parallel, foreach, doSNOW, Rmpi
 ################################################################
 library(raster)
-#rasterOptions(chunksize = 1e+09, maxmemory = 1e+09, progress = "text")
+rasterOptions(chunksize = 1e+09, maxmemory = 1e+09, progress = "text")
 
 #Definir Argumentos
 input1 <- "~/R/RGEE_HedgeRows/"
@@ -21,7 +21,19 @@ if(file.exists("RSDiversityES") == FALSE) dir.create("RSDiversityES")
 
 #Función para calculo de Spectral RAO
 ######################################
-spectralrao <- function(input, distance_m="euclidean", p=NULL, window=9, mode="classic", lambda=0, shannon=FALSE, rescale=FALSE, na.tolerance=0.0, simplify=3, nc.cores=1, cluster.type="MPI", debugging=FALSE, ...)
+spectralrao <- function(input, 
+                        distance_m="euclidean", 
+                        p=NULL, 
+                        window=9, 
+                        mode="classic", 
+                        lambda=0, 
+                        shannon=FALSE, 
+                        rescale=FALSE, 
+                        na.tolerance=0.0, 
+                        simplify=3, 
+                        nc.cores=1, 
+                        cluster.type="MPI",
+                        debugging=FALSE, ...)
 {
   #
   ## Load required packages
