@@ -1,3 +1,5 @@
+# Funciones hechas por Leandro Leal Parente
+#https://github.com/leandroleal
 ####################################################################################################
 
 plot.samples <- function(samples, property, colors, layers = list()) {
