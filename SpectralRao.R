@@ -1,5 +1,9 @@
 #Ejecutable para diversidad Espectral, índice de RAO
 #requiere raster, svMisc, proxy, parallel, foreach, doSNOW, Rmpi
+#la función esta disponible en el paquete rasterdiv, sin embargo 
+#encontre resultados diferentes entre esta función (la original)
+#y la función en el paquet, aunque los resulatdos estan correlacionados
+#y funcionan para la separación de cercas vivas 
 ################################################################
 library(raster)
 rasterOptions(chunksize = 1e+09, maxmemory = 1e+09, progress = "text")
