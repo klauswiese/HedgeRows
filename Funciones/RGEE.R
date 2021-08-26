@@ -215,6 +215,7 @@ WDVI <- function (img){
 }
 
 #NDYI
+#No recuerdo la fuente, buscar. L aprimera vez qu elo vi fue en presentación de Hanna Meyer.
 #NDYI=(B4−B3)/(B4+B3)
 NDYI <- function (img){
   ndyi <- img$expression(
