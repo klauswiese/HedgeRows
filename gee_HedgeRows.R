@@ -1,6 +1,7 @@
 #Código para clasificación supervisada GEE
 #HegdeRows Catacamas
-#K. Wiese
+#K. Wiese basado en el trabajo de Leandro Patente
+#(No tengo el link original del código, debo buscar mejor y citarlo aquí)
 #3 de Marzo 2021
 
 # Definir directorio de trabajo
