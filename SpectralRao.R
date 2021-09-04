@@ -10,9 +10,9 @@ library(raster)
 rasterOptions(chunksize = 1e+09, maxmemory = 1e+09, progress = "text")
 
 #Definir Argumentos
-input1 <- "~/R/RGEE_HedgeRows/"
-input2 <- "~/R/RGEE_Ganado/catacamas/Clip_T16PFB_20190129T160521_ndvi.tif"
-input3 <- 3
+input1 <- "~/R/RGEE_HedgeRows/" #Directorio de trabajo
+input2 <- "~/R/RGEE_Ganado/catacamas/Clip_T16PFB_20190129T160521_ndvi.tif" #NDVI original
+input3 <- 3 #Ventana para cálculo de RAO
 
 ini <- Sys.time()
 library(raster)
