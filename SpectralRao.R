@@ -566,14 +566,24 @@ SpectralRAO <- spectralrao(NDVI,
 RAO <- NDVI
 RAO[] <- SpectralRAO[[1]]
 writeRaster(RAO, 
-            file=paste("RSDiversityES/RAO_", names(NDVI), ".tiff", sep=""), 
+            file=paste("RSDiversityES/RAO_", 
+                       names(NDVI), 
+                       ".tiff", 
+                       sep=""), 
             overwrite=TRUE)
 
 #Shannon
 Shannon <- NDVI
 Shannon[] <- SpectralRAO[[2]]
 writeRaster(Shannon, 
-            file=paste("RSDiversityES/Shannon_", names(NDVI), ".tiff", sep=""), 
+            file=paste("RSDiversityES/Shannon_", 
+                       names(NDVI), 
+                       ".tiff", 
+                       sep=""), 
             overwrite=TRUE)
 
-print(paste("Tiempo Total ", Sys.time() - ini, " Minutos", sep=""))
+print(paste("Tiempo Total ", 
+            Sys.time() - ini, 
+            " Minutos", 
+            sep="")
+     )
