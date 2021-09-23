@@ -43,7 +43,7 @@ vv <-  ee$ImageCollection('COPERNICUS/S1_GRD')$filterBounds(Catacamas)$
 
 
 # Reducción considerando la colección de imágenes VV para el rango de tiempo definido
-S1VV.percs <- reduce.imagesS1(vv, "2020-01-01", "2020-12-31", extCatacamas, prefix='S1_', reducer=reducer)
+S1VV.percs <- reduce.imagesS1(vv, "2020-05-01", "2021-05-31", extCatacamas, prefix='S1_', reducer=reducer)#Año hidrológico
 
 # La salida de la reducción
 S1VV.percs.bands <- S1VV.percs$bandNames()$getInfo()
@@ -62,7 +62,7 @@ vh <-  ee$ImageCollection('COPERNICUS/S1_GRD')$filterBounds(Catacamas)$
   select('VH')
 
 # Reducción considerando la colección de imágenes VH para el rango de tiempo definido
-S1VH.percs <- reduce.imagesS1(vh, "2020-01-01", "2020-12-31", extCatacamas, prefix='S1_', reducer=reducer)
+S1VH.percs <- reduce.imagesS1(vh, "2020-05-01", "2021-05-31", extCatacamas, prefix='S1_', reducer=reducer)
 
 # La salida de la reducción
 S1VH.percs.bands <- S1VH.percs$bandNames()$getInfo()
@@ -78,7 +78,7 @@ RadarVV <-  ee$ImageCollection('COPERNICUS/S1_GRD')$filterBounds(Catacamas)$
   filter(ee$Filter$listContains('transmitterReceiverPolarisation', 'VV'))$
   filter(ee$Filter$eq('instrumentMode', 'IW'))$
   filter(ee$Filter$eq('orbitProperties_pass', 'DESCENDING'))$
-  filterDate('2019-01-01','2019-02-01')$
+  filterDate('2021-08-01','2021-08-10')$
   select('VV')$median()$rename("VV")$clip(extCatacamas)
 
 #Filtrado
