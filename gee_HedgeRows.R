@@ -172,9 +172,8 @@ Brick <- sen2$
 Brick.bands <- Brick$bandNames()$getInfo()
 print(Brick.bands)
 
-#Muestras
 # Cargar colección de datos para clasificación ----
-#Muestras
+# Entrenamiento
 Muestras <- "SHP/Entrenamiento.shp" %>%
   st_read(quiet = TRUE) %>% 
   sf_as_ee()
