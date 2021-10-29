@@ -1,6 +1,6 @@
 # HedgeRows
 
-RGEE code
+[RGEE](https://github.com/r-spatial/rgee) code
 
 # Data
 
