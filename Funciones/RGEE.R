@@ -125,6 +125,7 @@ overlayer.polygons <- function(samples, image) {
 }
 
 #Índices de Vegetación
+#K. Wiese
 
 #EVI
 EVI <- function (img) {
